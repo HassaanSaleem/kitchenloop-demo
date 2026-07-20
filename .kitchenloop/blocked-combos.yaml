@@ -1,0 +1,20 @@
+# Blocked Combos Registry
+#
+# Machine-readable registry of known-broken feature/dimension combinations.
+# The ideation phase reads this to skip known-broken paths.
+# When a blocking ticket is resolved, remove the entry so the combo
+# becomes available for ideation again.
+#
+# Axes match kitchenloop.yaml spec.dimensions:
+#   feature:   notes-editor | sharing | search
+#   platform:  web | api
+#   user_type: author | reader
+#
+# Format (ticket is a backlog.json id — ticketing.provider is "none"):
+#   blocked_combos:
+#     - combo: { feature: "sharing", platform: "api", user_type: "reader" }
+#       reason: "Share-link flow not implemented until its backlog ticket lands"
+#       since_iteration: 1
+#       ticket: "<backlog ticket id>"
+
+blocked_combos: []

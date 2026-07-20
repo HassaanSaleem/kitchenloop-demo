@@ -1,0 +1,23 @@
+node_modules/
+.env
+data/
+
+# Loop runtime state that never belongs in git
+.kitchenloop/logs/
+.kitchenloop/uat-runs/
+.kitchenloop/evidence/
+.kitchenloop/metrics.json
+.kitchenloop/state/
+.kitchenloop/*.lock
+.kitchenloop/STOP
+
+# NOTE: backlog.json, coverage-matrix.yaml, uat-cards/ are TRACKED on purpose —
+# the local ticket provider and the UAT gate move them between worktrees via git.
+
+# PR manager runtime state
+scripts/pr-manager/state.json
+scripts/pr-manager/*.log
+
+.claude/worktrees/
+.claude/settings.local.json
+.specify/feature.json

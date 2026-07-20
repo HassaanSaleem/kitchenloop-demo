@@ -1,0 +1,16 @@
+{
+  "name": "relay-notes",
+  "version": "0.1.0",
+  "description": "A tiny note-taking service for Relay — created as the seed project the KitchenLoop harness evolves autonomously.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test",
+    "lint": "node scripts/lint.mjs",
+    "smoke": "node tests/smoke.mjs",
+    "start": "node src/server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

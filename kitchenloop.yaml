@@ -1,0 +1,148 @@
+# ─── KitchenLoop Configuration — relay-notes demo ────────────────────────
+
+project:
+  name: "relay-notes"
+  description: "A tiny note-taking service for Relay — notes with tags, full-text search, and read-only share links over a JSON HTTP API"
+  language: "javascript"
+  context: |
+    relay-notes is a zero-dependency Node.js service (node:http, node:test).
+    A tiny note-taking product: create/list/delete notes with tags, full-text
+    search, and read-only share links.
+
+    A typical user session:
+    An author creates a few notes over the API and lists them newest-first
+    They search for a note by a word in its body
+    They share a note and a reader opens it through the share token
+
+    Success = the API journey (create -> list -> search -> share -> shared read)
+    works exactly as documented in README.md, with honest errors on bad input.
+
+repo:
+  base_branch: "main"
+  pr_target: "main"
+  iteration_branch_prefix: "kitchen/iter"
+  env_file: ".env"
+
+paths:
+  reports: "docs/internal/reports"
+  loop_state: "docs/internal/loop-state.md"
+  patterns: "memory/codebase-patterns.md"
+  logs: ".kitchenloop/logs"
+  scenarios: "scenarios/incubating"
+  worktree_prefix: ".claude/worktrees"
+  execute_worktree: ".claude/worktrees/kitchenloop"
+  uat_cards: ".kitchenloop/uat-cards"
+  uat_runs: ".kitchenloop/uat-runs"
+  unbeatable_tests: ".kitchenloop/unbeatable-tests.md"
+
+spec:
+  docs:
+    - "README.md"
+    - ".specify/memory/constitution.md"
+  dimensions:
+    features:
+      - "notes-editor"
+      - "sharing"
+      - "search"
+    platforms:
+      - "api"
+    user_types:
+      - "author"
+      - "reader"
+  # Roadmap discipline: P0 is API-only. Ideate/triage must not target blocked
+  # items until the owner unlocks their phase.
+  blocked:
+    - id: "web-ui"
+      phase: "P2"
+      reason: "Browser UI — API-first P0; a web surface unlocks at P2"
+    - id: "auth-accounts"
+      phase: "P2"
+      reason: "User accounts/auth — P0 is single-tenant local"
+
+verification:
+  oracle:
+    type: "deterministic"
+    full_command: "node --test"
+    quick_command: "node --test"
+    smoke_command: "node tests/smoke.mjs"
+    lint_command: "node scripts/lint.mjs"
+  regress_l3_boot: false
+  # Live Test & Fix: empty commands = the execute phase records SKIPPED
+  # explicitly in the PR body (no Docker on this host for the demo run).
+  live:
+    boot_command: ""
+    e2e_command: ""
+    logs_command: ""
+    teardown_command: ""
+    base_url: "http://localhost:3000"
+    evidence_dir: ".kitchenloop/evidence"
+    log_error_pattern: "ERROR|FATAL|Unhandled"
+    log_allowlist: []
+    max_fix_cycles: 3
+  preflight_env_vars: []
+  stop_conditions:
+    pass_rate_floor: 0.95
+    max_consecutive_failures: 3
+    test_count_decline_iters: 3
+  skip_policy:
+    ideate_fail: "continue"
+    execute_fail: "continue"
+    regress_fail: "pause"
+  merge_gates: []
+
+ticketing:
+  provider: "none"
+
+quality:
+  bar_file: ".kitchenloop/quality-bar.md"
+
+notify:
+  desktop: false
+
+pr_manager:
+  author_allowlist: []
+  review_bot: ""
+  require_ci: false
+  skip_after_failures: 2
+
+reviewers:
+  codex:
+    enabled: false
+    timeout: 300
+  gemini:
+    enabled: false
+    timeout: 60
+
+runtime:
+  timeouts:
+    ideate: 2700
+    triage: 1200
+    execute: 5400
+    polish: 3600
+    regress: 5400
+    backlog: 900
+  backlog_interval: 3
+  review_interval: 3
+  polish_max_prs: 2
+  drain_threshold: 10
+  drain_exit_threshold: 5
+
+# Per-phase model pins: heavy implementation on Opus, everything else Sonnet.
+models:
+  ideate: "claude-sonnet-5"
+  triage: "claude-sonnet-5"
+  execute: "claude-opus-4-8"
+  polish: "claude-sonnet-5"
+  regress: "claude-sonnet-5"
+  backlog: "claude-sonnet-5"
+  review: "claude-sonnet-5"
+
+modes:
+  default:
+    ideate_prompt: "prompts/ideate.md"
+  backtest:
+    ideate_prompt: "prompts/ideate-backtest.md"
+    description: "Exercise your testing pipeline"
+  exploration:
+    ideate_prompt: "prompts/ideate-exploration.md"
+    description: "Explore coverage gaps"
