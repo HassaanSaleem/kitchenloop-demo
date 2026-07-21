@@ -91,6 +91,23 @@ test("GET /search does not 500 when a note in the store lacks a title", async ()
   }
 });
 
+test("GET /search matches regardless of case", async () => {
+  const srv = await start();
+  try {
+    await fetch(`${srv.base}/notes`, {
+      method: "POST",
+      body: JSON.stringify({ title: "Relay Launch", body: "ship the demo" }),
+    });
+    const res = await fetch(`${srv.base}/search?q=relay`);
+    assert.equal(res.status, 200);
+    const results = await res.json();
+    assert.equal(results.length, 1, "lowercase query should match the title-cased note");
+    assert.equal(results[0].title, "Relay Launch");
+  } finally {
+    srv.close();
+  }
+});
+
 test("POST /notes/:id/share on an unknown id returns 404", async () => {
   const srv = await start();
   try {
