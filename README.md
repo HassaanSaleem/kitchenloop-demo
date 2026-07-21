@@ -18,9 +18,16 @@ GET    /notes                                    -> 200 [notes], newest first
 GET    /notes/:id                                -> 200 note | 404
 DELETE /notes/:id                                -> 204 | 404
 GET    /search?q=term                            -> 200 [notes]
-POST   /notes/:id/share                          -> 201 {token}
+POST   /notes/:id/share                          -> 201 {token} | 404
 GET    /shared/:token                            -> 200 note | 404
 ```
+
+- `POST /notes` requires a non-empty `title`; a missing or blank title is
+  rejected with `400 {"error":"title is required"}`.
+- `GET /search` matches `q` **case-insensitively** against each note's `title`,
+  `body`, and `tags`.
+- `POST /notes/:id/share` returns `404` for a note id that doesn't exist, the
+  same as `GET`/`DELETE /notes/:id`.
 
 ```bash
 npm start          # serve on :3000 (PORT to override)

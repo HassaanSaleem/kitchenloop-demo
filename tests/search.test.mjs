@@ -22,3 +22,39 @@ test("empty query returns nothing", () => {
   assert.equal(searchNotes(store, "").length, 0);
   assert.equal(searchNotes(store, null).length, 0);
 });
+
+test("search matches a note by its tags, not just title/body", () => {
+  const store = tempStore();
+  store.create({ title: "Standup notes", body: "ship the relay demo", tags: ["work", "urgent"] });
+  store.create({ title: "Groceries", body: "milk", tags: ["home"] });
+  const hits = searchNotes(store, "work");
+  assert.equal(hits.length, 1, "a tag-only query should match the tagged note");
+  assert.equal(hits[0].title, "Standup notes");
+  assert.equal(searchNotes(store, "URGENT").length, 1, "tag matching is case-insensitive too");
+});
+
+test("search is case-insensitive across query and note casing", () => {
+  const store = tempStore();
+  store.create({ title: "Relay Launch", body: "Ship It" });
+  assert.equal(searchNotes(store, "relay").length, 1, "lowercase query matches title-cased note");
+  assert.equal(searchNotes(store, "RELAY").length, 1, "uppercase query matches too");
+  assert.equal(searchNotes(store, "ship").length, 1, "case-insensitive on the body as well");
+});
+
+test("tolerates malformed notes (missing title or body) without throwing", () => {
+  const store = tempStore();
+  store.create({ title: "Groceries", body: "milk, eggs" });
+  store.create({ body: "orphaned body, no title" }); // title === undefined
+  store.notes.set("hand-crafted", {
+    id: "hand-crafted",
+    title: "Loose",
+    body: undefined, // undefined body
+    tags: [],
+    createdAt: new Date(0).toISOString(),
+    updatedAt: new Date(0).toISOString(),
+  });
+  assert.doesNotThrow(() => searchNotes(store, "milk"));
+  const hits = searchNotes(store, "milk");
+  assert.equal(hits.length, 1, "well-formed note is still found alongside malformed ones");
+  assert.equal(hits[0].title, "Groceries");
+});
