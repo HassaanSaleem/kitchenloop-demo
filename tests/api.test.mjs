@@ -73,3 +73,36 @@ test("POST /notes with a blank title returns 400", async () => {
     srv.close();
   }
 });
+
+test("POST /notes/:id/share on an unknown id returns 404", async () => {
+  const srv = await start();
+  try {
+    const res = await fetch(`${srv.base}/notes/00000000-0000-0000-0000-000000000000/share`, {
+      method: "POST",
+    });
+    assert.equal(res.status, 404, "sharing a nonexistent note id must 404, not mint a token");
+  } finally {
+    srv.close();
+  }
+});
+
+test("POST /notes/:id/share on a real id returns 201 with a resolvable token", async () => {
+  const srv = await start();
+  try {
+    const note = await (await fetch(`${srv.base}/notes`, {
+      method: "POST",
+      body: JSON.stringify({ title: "Shareable", body: "read-only please" }),
+    })).json();
+
+    const shareRes = await fetch(`${srv.base}/notes/${note.id}/share`, { method: "POST" });
+    assert.equal(shareRes.status, 201, "sharing a real note should still succeed");
+    const { token } = await shareRes.json();
+    assert.ok(token, "share should return a token");
+
+    const shared = await fetch(`${srv.base}/shared/${token}`);
+    assert.equal(shared.status, 200, "the minted token should resolve to the note");
+    assert.equal((await shared.json()).id, note.id);
+  } finally {
+    srv.close();
+  }
+});
