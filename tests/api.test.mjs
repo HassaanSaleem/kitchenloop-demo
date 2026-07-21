@@ -1,0 +1,75 @@
+// L3 integration tests: boot the real HTTP server on an ephemeral port and
+// drive it over real HTTP, asserting on status codes and response bodies (real
+// state deltas) — no mocks at the system boundary.
+
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
+import { buildApp } from "../src/server.mjs";
+
+// Boot buildApp on an ephemeral port. Pass a pre-seeded storePath to exercise
+// notes that already exist on disk (e.g. a malformed record).
+async function start(storePath) {
+  const path = storePath ?? join(mkdtempSync(join(tmpdir(), "relay-api-")), "notes.json");
+  const app = buildApp({ storePath: path });
+  await new Promise((resolve) => app.listen(0, resolve));
+  return {
+    base: `http://127.0.0.1:${app.address().port}`,
+    close: () => app.close(),
+  };
+}
+
+// Write a raw notes.json (bypassing the API) so we can seed records the API
+// would now reject — used to prove search tolerates pre-existing bad data.
+function seedStore(notes) {
+  const path = join(mkdtempSync(join(tmpdir(), "relay-api-seed-")), "notes.json");
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, JSON.stringify(notes, null, 2));
+  return path;
+}
+
+test("POST /notes with a valid title returns 201 and the created note", async () => {
+  const srv = await start();
+  try {
+    const res = await fetch(`${srv.base}/notes`, {
+      method: "POST",
+      body: JSON.stringify({ title: "Groceries", body: "milk, eggs" }),
+    });
+    assert.equal(res.status, 201);
+    const note = await res.json();
+    assert.ok(note.id, "created note should have an id");
+    assert.equal(note.title, "Groceries");
+  } finally {
+    srv.close();
+  }
+});
+
+test("POST /notes with no title key returns 400", async () => {
+  const srv = await start();
+  try {
+    const res = await fetch(`${srv.base}/notes`, {
+      method: "POST",
+      body: JSON.stringify({ body: "no title" }),
+    });
+    assert.equal(res.status, 400, "missing title must be rejected with 400");
+    const err = await res.json();
+    assert.match(err.error, /title/i, "error body should mention the title");
+  } finally {
+    srv.close();
+  }
+});
+
+test("POST /notes with a blank title returns 400", async () => {
+  const srv = await start();
+  try {
+    const res = await fetch(`${srv.base}/notes`, {
+      method: "POST",
+      body: JSON.stringify({ title: "   ", body: "blank title" }),
+    });
+    assert.equal(res.status, 400, "empty/whitespace title must be rejected with 400");
+  } finally {
+    srv.close();
+  }
+});
