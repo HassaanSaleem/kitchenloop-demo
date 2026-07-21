@@ -53,6 +53,36 @@ test("POST /notes with an empty title returns 400", async () => {
   }
 });
 
+test("POST /notes with a non-object JSON body returns 400", async () => {
+  const { base, close } = await startApp();
+  try {
+    const resp = await fetch(`${base}/notes`, {
+      method: "POST",
+      body: JSON.stringify(["not", "an", "object"]),
+    });
+    assert.equal(resp.status, 400);
+    const json = await resp.json();
+    assert.ok(json.error, "400 response carries a JSON error body");
+  } finally {
+    await close();
+  }
+});
+
+test("POST /notes with a malformed JSON body returns 400, not 500", async () => {
+  const { base, close } = await startApp();
+  try {
+    const resp = await fetch(`${base}/notes`, {
+      method: "POST",
+      body: "{ this is not valid json",
+    });
+    assert.equal(resp.status, 400, "malformed JSON is bad input -> 4xx, never 500");
+    const json = await resp.json();
+    assert.ok(json.error, "400 response carries a JSON error body");
+  } finally {
+    await close();
+  }
+});
+
 test("POST /notes with a valid title still returns 201", async () => {
   const { base, close } = await startApp();
   try {

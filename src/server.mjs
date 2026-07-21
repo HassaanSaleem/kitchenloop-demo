@@ -60,7 +60,9 @@ export function buildApp({ storePath } = {}) {
       }
       return send(404, { error: "no such route" });
     } catch (err) {
-      return send(500, { error: err.message });
+      // Bad input carries a 4xx statusCode (constitution III — "bad input gets a
+      // 4xx"); anything else is an unexpected failure and gets a 500.
+      return send(err.statusCode ?? 500, { error: err.message });
     }
   });
 }
@@ -79,6 +81,14 @@ function validateCreate(body) {
   return null;
 }
 
+// Tag an Error with a 4xx status so the top-level handler answers with that code
+// (constitution III — bad input is a 4xx, not a 500) instead of defaulting to 500.
+function badRequest(message) {
+  const err = new Error(message);
+  err.statusCode = 400;
+  return err;
+}
+
 function readJson(req) {
   return new Promise((resolve, reject) => {
     let data = "";
@@ -86,8 +96,8 @@ function readJson(req) {
     req.on("end", () => {
       try {
         resolve(data ? JSON.parse(data) : {});
-      } catch (err) {
-        reject(err);
+      } catch {
+        reject(badRequest("request body must be valid JSON"));
       }
     });
     req.on("error", reject);
