@@ -48,13 +48,16 @@ export function extractDimension(yamlText, key) {
   const items = [];
   for (let i = start + 1; i < lines.length; i++) {
     const line = lines[i];
-    const m = line.match(/^\s{4}-\s*"([^"]+)"/);
+    // List items may sit at the same 4-space indent as the key or nested
+    // deeper (standard YAML puts them at 6). Accept 4-or-more leading spaces.
+    const m = line.match(/^\s{4,}-\s*"([^"]+)"/);
     if (m) {
       items.push(m[1]);
       continue;
     }
-    if (/^\s{4}#/.test(line)) continue; // inline comment at list-item indent
-    break; // anything else ends the list
+    if (line.trim() === "") continue; // blank line within the block
+    if (/^\s{4,}#/.test(line)) continue; // comment at list-item indent
+    break; // a key at <=4 indent (next dimension/section) ends the list
   }
   return items;
 }

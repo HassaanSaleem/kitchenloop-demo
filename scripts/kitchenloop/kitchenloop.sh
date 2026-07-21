@@ -293,7 +293,9 @@ command -v notify_owner >/dev/null 2>&1 || notify_owner() { :; }
 # escalation.
 escalation_count() {
   [ -f "$ESCALATIONS_FILE" ] || { echo 0; return 0; }
-  grep -cE '^\| [A-Z]+-[0-9]+ \|' "$ESCALATIONS_FILE" 2>/dev/null || echo 0
+  # `grep -c` already prints 0 on no-match (and exits 1); `|| true` swallows
+  # that exit without a second echo, so this never returns "0\n0".
+  grep -cE '^\| [A-Z]+-[0-9]+ \|' "$ESCALATIONS_FILE" 2>/dev/null || true
 }
 
 # enforce_stop — if the sentinel exists, print it and refuse to run (exit 1).

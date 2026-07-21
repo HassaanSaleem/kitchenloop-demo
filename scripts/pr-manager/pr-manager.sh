@@ -512,10 +512,13 @@ check_pr_deletions() {
 # run BEFORE spawning the agent: any PR that touches a protected artifact is
 # NOT_MERGEABLE and gets an ESCALATIONS.md entry (a loop-authored gate change is
 # an owner decision, never a loop merge).
+# The loop's own gates and doctrine — a PR may not change these without an
+# owner escalation. (UAT *cards* are NOT here: the execute phase legitimately
+# authors a new card per ticket; tamper-proofing sealed cards is the UAT
+# gate's deterministic freeze check, not this merge guard's job.)
 PROTECTED_PATHS="\
 .kitchenloop/quality-bar.md
 .kitchenloop/unbeatable-tests.md
-.kitchenloop/uat-cards/
 scripts/pr-manager/
 scripts/kitchenloop/prompts/
 kitchenloop.yaml
