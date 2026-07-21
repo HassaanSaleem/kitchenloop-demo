@@ -51,7 +51,6 @@ not merge the PR:
 
 - `.kitchenloop/quality-bar.md`
 - `.kitchenloop/unbeatable-tests.md`
-- `.kitchenloop/uat-cards/`
 - `scripts/pr-manager/`
 - `scripts/kitchenloop/prompts/`
 - `kitchenloop.yaml`
@@ -112,8 +111,14 @@ If issues persist after 2 fix attempts: output `RESULT: STUCK: critical review i
 Collect independent reviews from all available external reviewers. Each reviewer
 outputs `APPROVE` or `REQUEST_CHANGES` with specific feedback.
 
-### 4a. Codex Review (primary external reviewer — spec/architecture/code alignment)
-Run from inside the PR worktree so the diff is against the PR branch.
+### 4a. Codex Review (only if `reviewers.codex.enabled: true` in kitchenloop.yaml)
+
+Codex is an **optional** second, cross-vendor reviewer, independent of the Claude
+`pr-auditor` in Stage 3. **If `reviewers.codex.enabled: false`, skip this stage
+entirely** — do not count it; the Stage 3 pr-auditor is the review gate, and a
+single-subscription (Claude-only) setup merges on that alone. Run the rest of
+this stage only when codex is enabled, from inside the PR worktree so the diff is
+against the PR branch.
 
 **First resolve THIS PR's real feature spec directory — never pass codex the
 literal `specs/<NNN-feature>` placeholder, or it reviews blind to the spec (the
@@ -160,12 +165,13 @@ End your output with a line containing exactly APPROVE or REQUEST_CHANGES, then 
 Read the verdict from `/tmp/codex-4a-{{PR_NUMBER}}.txt` (the last APPROVE/REQUEST_CHANGES line).
 Timeout: 300s (or `reviewers.codex.timeout` in kitchenloop.yaml).
 
-**Codex is a MANDATE-named merge gate.** If codex times out or is unavailable,
-you MUST NOT proceed on the strength of the other reviewers. Add an
-ESCALATIONS.md entry recording the codex outage for PR #{{PR_NUMBER}} (the codex
-alignment review could not run), output
-`RESULT: STUCK: codex review unavailable (merge gate)`, and stop. Never record
-the outage only in a PR comment.
+**When enabled, codex is a MANDATE-named merge gate.** If it is enabled but
+times out or is unavailable, you MUST NOT silently proceed on the other
+reviewers: add an ESCALATIONS.md entry recording the codex outage for
+PR #{{PR_NUMBER}}, output `RESULT: STUCK: codex review unavailable (merge gate)`,
+and stop. This applies only when codex is enabled — with
+`reviewers.codex.enabled: false` there is nothing to wait on and the Stage 3
+pr-auditor stands as the gate. Never record an outage only in a PR comment.
 
 **Routing rule (two-loop routing):** VIOLATION / MISSING-IMPL / DRIFT / EXTRA-BEHAVIOR
 mean the *code* is wrong → fix autonomously in this pipeline. SPEC-GAP means the
@@ -192,20 +198,24 @@ MANDATE-named gate).
 
 ### 4c. Consensus Classification
 
-Combine verdicts from Stage 3 (pr-auditor) and Stage 4a (codex, mandatory) plus
-Stage 4b (gemini, if enabled) into a tribunal:
+Combine the Stage 3 pr-auditor verdict (always) with whichever external
+reviewers are enabled — Stage 4a (codex) and/or Stage 4b (gemini) — into a
+tribunal:
 
-| All available reviewers | Classification | Action |
+| All counted reviewers | Classification | Action |
 |---|---|---|
 | All APPROVE | **CONFIRMED** | Proceed |
 | Majority APPROVE | **LIKELY** | Proceed, log dissenting review in PR comment |
 | Majority REQUEST_CHANGES | **FLAG** | Add `needs-attention` label, output `RESULT: STUCK: majority reviewer rejection` |
 | All REQUEST_CHANGES | **BLOCKED** | Output `RESULT: STUCK: unanimous reviewer rejection` |
 
-- Codex UNAVAILABLE never collapses the tribunal — it stops (see Stage 4a).
-- With codex mandatory, at least two reviewers (pr-auditor + codex) always count.
-- When only 2 reviewers are available: majority = both must agree.
-- `UNAVAILABLE` (gemini only) reviewers are excluded from the count.
+- The Stage 3 pr-auditor always counts. A **single-subscription (Claude-only)**
+  setup with both external reviewers disabled merges on the pr-auditor's APPROVE
+  alone — that is a valid one-reviewer gate, not a weakened one.
+- An **enabled**-but-UNAVAILABLE codex never collapses the tribunal — it stops
+  (see Stage 4a). A disabled codex is simply not counted.
+- When exactly two reviewers count: majority = both must agree.
+- `UNAVAILABLE` reviewers (an enabled reviewer that errored) are excluded from the count.
 - If REQUEST_CHANGES from any reviewer: attempt to fix the feedback first, then re-evaluate.
   After 2 fix attempts, use the latest verdicts for final classification.
 
@@ -268,7 +278,9 @@ If threads still unresolved after 4 rounds: continue (non-blocking).
 
 ## Stage 8: Final Check
 
-Run one final Codex review (hard gate for critical issues). Same codex-cli ≥ 0.142
+**Only if `reviewers.codex.enabled: true`** (skip this stage entirely when codex
+is disabled — Stage 3's pr-auditor already gated the merge). Run one final Codex
+review (hard gate for critical issues). Same codex-cli ≥ 0.142
 constraint as Stage 4a — use `codex exec` (a custom prompt cannot be combined with
 `codex review --base`), run from inside the PR worktree ({{WORKTREE}}), with
 stdin closed (`< /dev/null`, as in Stage 4a — otherwise codex exec hangs on a
@@ -277,9 +289,9 @@ stdin read in the non-interactive shell):
 codex exec --output-last-message /tmp/codex-8-{{PR_NUMBER}}.txt "Final merge-safety review of PR #{{PR_NUMBER}}. Review ONLY the changes this branch introduces over {{BASE_BRANCH}}: first run  git diff {{BASE_BRANCH}}...HEAD . Is this PR safe to merge? Check ONLY for critical issues: data loss, money-path bugs (double-charge/double-record, non-conserving failure paths), schema breakage, security, and in-process cross-request state on the serverless surface. End your output with a line containing exactly APPROVE or REJECT, with reason." < /dev/null
 ```
 Read the verdict from `/tmp/codex-8-{{PR_NUMBER}}.txt` (the last APPROVE/REJECT line).
-Timeout: 300s. Codex is a MANDATE-named merge gate: if it is unavailable here,
-you MUST NOT treat the PR as approved. Add an ESCALATIONS.md entry recording the
-codex outage for PR #{{PR_NUMBER}}, output
+Timeout: 300s. When codex is enabled it is a MANDATE-named merge gate: if it is
+unavailable here, you MUST NOT treat the PR as approved. Add an ESCALATIONS.md
+entry recording the codex outage for PR #{{PR_NUMBER}}, output
 `RESULT: STUCK: codex final review unavailable (merge gate)`, and stop.
 
 If REJECT with critical reason: output `RESULT: STUCK: final review rejection`.

@@ -61,12 +61,11 @@ spec:
 
 verification:
   oracle:
-    type: "deterministic"
     full_command: "node --test tests/*.test.mjs"
     quick_command: "node --test tests/*.test.mjs"
     smoke_command: "node tests/smoke.mjs"
     lint_command: "node scripts/lint.mjs"
-  regress_l3_boot: false
+  regress_l3_boot: false   # no Docker on this host; L3 live-boot records SKIPPED
   # Live Test & Fix: empty commands = the execute phase records SKIPPED
   # explicitly in the PR body (no Docker on this host for the demo run).
   live:
@@ -74,7 +73,6 @@ verification:
     e2e_command: ""
     logs_command: ""
     teardown_command: ""
-    base_url: "http://localhost:3000"
     evidence_dir: ".kitchenloop/evidence"
     log_error_pattern: "ERROR|FATAL|Unhandled"
     log_allowlist: []
@@ -88,26 +86,27 @@ verification:
     ideate_fail: "continue"
     execute_fail: "continue"
     regress_fail: "pause"
-  merge_gates: []
+  # CI merge gate is via pr_manager.require_ci below (off for this demo).
 
 ticketing:
   provider: "none"
 
-quality:
-  bar_file: ".kitchenloop/quality-bar.md"
-
 notify:
-  desktop: false
+  desktop: false   # demo runs headless/CI; no macOS desktop notifications
 
 pr_manager:
   author_allowlist: []
   review_bot: ""
-  require_ci: false
+  require_ci: false        # demo has a ci.yml but the loop does not block merges on Actions (keeps iterations self-contained)
   skip_after_failures: 2
 
+# Review tribunal. The Claude pr-auditor always runs; codex/gemini are optional
+# cross-vendor reviewers. This demo enables codex (a second, independent review):
+# with it on, codex must APPROVE before merge or the pipeline goes STUCK. Set
+# enabled:false to run Claude-only. gemini off (no gemini CLI here).
 reviewers:
   codex:
-    enabled: false
+    enabled: true
     timeout: 300
   gemini:
     enabled: false

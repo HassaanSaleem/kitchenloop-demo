@@ -26,8 +26,10 @@ If any files are listed:
 ## Stage 8.6: Merge-Gate Evidence (Hard Gate)
 
 MANDATE.md grants merge autonomy only to PRs that pass EVERY gate:
-lint + tests + codex alignment review + **UAT card** + **regression oracle**.
-Codex is covered by Stages 4a/8. Verify the remaining two here:
+lint + tests + the code-review tribunal (the Claude pr-auditor always, plus codex
+alignment review when `reviewers.codex.enabled`) + **UAT card** + **regression
+oracle**. The review tribunal is covered by Stages 3/4a/8. Verify the remaining
+two here:
 
 1. **UAT card verdict.** The PR must NOT carry the `uat-failed` label, and it
    must have a UAT evidence comment from the execute phase:
