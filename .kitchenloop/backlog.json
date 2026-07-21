@@ -7,8 +7,8 @@
     "priority": "critical",
     "state": "in_review",
     "created": "2026-07-21T08:23:41Z",
-    "pr_url": "https://github.com/HassaanSaleem/kitchenloop-demo/pull/1",
-    "notes": "Related: 17846222216546600150 (GET /search 500s for the whole collection if any note lacks a title) is the downstream symptom of this root cause."
+    "pr_url": "https://github.com/HassaanSaleem/kitchenloop-demo/pull/2",
+    "notes": "Related: 17846222216546600150 (GET /search 500s for the whole collection if any note lacks a title) is the downstream symptom of this root cause.\nFix for this ticket was closed/abandoned without merging (PR #1, https://github.com/HassaanSaleem/kitchenloop-demo/pull/1, branch kitchen/batch-notes-validation-search-share deleted, mergedAt: null). Bug is still live on main. Re-promoting for execution.\nRe-executed in iteration 1 bundle (branch kitchen/batch-notes-hardening -> PR #2, commit eaf1d31). Oracle green; UAT gate PASS 8/8."
   },
   {
     "id": "17846222216546600150",
@@ -18,8 +18,8 @@
     "priority": "high",
     "state": "in_review",
     "created": "2026-07-21T08:23:41Z",
-    "pr_url": "https://github.com/HassaanSaleem/kitchenloop-demo/pull/1",
-    "notes": "Related: 17846222216546606501 (POST /notes accepts missing title, violating documented schema) is the root cause. Fixing it stops new occurrences, but this ticket is the defensive fix in search.mjs itself."
+    "pr_url": "https://github.com/HassaanSaleem/kitchenloop-demo/pull/2",
+    "notes": "Related: 17846222216546606501 (POST /notes accepts missing title, violating documented schema) is the root cause. Fixing it stops new occurrences, but this ticket is the defensive fix in search.mjs itself.\nFix for this ticket was closed/abandoned without merging (PR #1, https://github.com/HassaanSaleem/kitchenloop-demo/pull/1, branch kitchen/batch-notes-validation-search-share deleted, mergedAt: null). Bug is still live on main. Re-promoting for execution.\nRe-executed in iteration 1 bundle (branch kitchen/batch-notes-hardening -> PR #2, commit eaf1d31). Oracle green; UAT gate PASS 8/8."
   },
   {
     "id": "17846222216546655427",
@@ -29,7 +29,8 @@
     "priority": "high",
     "state": "in_review",
     "created": "2026-07-21T08:23:41Z",
-    "pr_url": "https://github.com/HassaanSaleem/kitchenloop-demo/pull/1"
+    "pr_url": "https://github.com/HassaanSaleem/kitchenloop-demo/pull/2",
+    "notes": "Fix for this ticket was closed/abandoned without merging (PR #1, https://github.com/HassaanSaleem/kitchenloop-demo/pull/1, branch kitchen/batch-notes-validation-search-share deleted, mergedAt: null). Bug is still live on main. Re-promoting for execution.\nRe-executed in iteration 1 bundle (branch kitchen/batch-notes-hardening -> PR #2, commit eaf1d31). Oracle green; UAT gate PASS 8/8."
   },
   {
     "id": "17846222216546647429",
@@ -39,7 +40,8 @@
     "priority": "medium",
     "state": "in_review",
     "created": "2026-07-21T08:23:41Z",
-    "pr_url": "https://github.com/HassaanSaleem/kitchenloop-demo/pull/1"
+    "pr_url": "https://github.com/HassaanSaleem/kitchenloop-demo/pull/2",
+    "notes": "Fix for this ticket was closed/abandoned without merging (PR #1, https://github.com/HassaanSaleem/kitchenloop-demo/pull/1, branch kitchen/batch-notes-validation-search-share deleted, mergedAt: null). Bug is still live on main. Re-promoting for execution.\nRe-executed in iteration 1 bundle (branch kitchen/batch-notes-hardening -> PR #2, commit eaf1d31). Oracle green; UAT gate PASS 8/8."
   },
   {
     "id": "17846222216546654897",
@@ -49,7 +51,8 @@
     "priority": "medium",
     "state": "in_review",
     "created": "2026-07-21T08:23:41Z",
-    "pr_url": "https://github.com/HassaanSaleem/kitchenloop-demo/pull/1"
+    "pr_url": "https://github.com/HassaanSaleem/kitchenloop-demo/pull/2",
+    "notes": "Fix for this ticket was closed/abandoned without merging (PR #1, https://github.com/HassaanSaleem/kitchenloop-demo/pull/1, branch kitchen/batch-notes-validation-search-share deleted, mergedAt: null). Bug is still live on main. Re-promoting for execution.\nRe-executed in iteration 1 bundle (branch kitchen/batch-notes-hardening -> PR #2, commit eaf1d31). Oracle green; UAT gate PASS 8/8."
   },
   {
     "id": "17846222216546600848",
