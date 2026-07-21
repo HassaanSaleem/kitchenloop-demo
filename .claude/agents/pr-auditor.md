@@ -57,12 +57,12 @@ findings with `file:line` and a one-line evidence excerpt.
    architecture invariants). Check the implementation AGAINST them. Classify any
    misalignment:
    - VIOLATION (code contradicts spec/plan),
-   - CODE-MISSING (spec requirement unimplemented, no recorded deferral),
+   - MISSING-IMPL (spec requirement unimplemented, no recorded deferral),
    - DRIFT (violates a documented architecture invariant — e.g. a core schema
      forked outside its canonical package; external API shapes leaking past the
      adapter boundary),
-   - CODE-AHEAD (behavior with no spec/plan basis; scope creep),
-   - SPEC-SILENT (significant behavior the spec is silent on — NOT blocking;
+   - EXTRA-BEHAVIOR (behavior with no spec/plan basis; scope creep),
+   - SPEC-GAP (significant behavior the spec is silent on — NOT blocking;
      report it so a spec-amendment ticket is filed).
 
 6. **Mandatory PR-body honesty sections** (the Live Test & Fix rule,
@@ -80,10 +80,10 @@ findings with `file:line` and a one-line evidence excerpt.
 
 ## Verdict Rules
 
-- Any VIOLATION / CODE-MISSING / DRIFT / CODE-AHEAD (non-cosmetic), any critical
+- Any VIOLATION / MISSING-IMPL / DRIFT / EXTRA-BEHAVIOR (non-cosmetic), any critical
   security/logic finding, any missing mandatory PR-body section, or any weakened
   test assertion → `REQUEST_CHANGES`.
-- SPEC-SILENT findings alone do not block: note them for a spec-amendment ticket
+- SPEC-GAP findings alone do not block: note them for a spec-amendment ticket
   and you may still `APPROVE` if nothing else blocks.
 - Only when you have verified every axis and nothing blocks → `APPROVE`.
 
@@ -96,7 +96,7 @@ either `APPROVE` or `REQUEST_CHANGES` (nothing else on that line):
 ## PR Auditor Review — PR #<n>
 
 ### Findings
-- [SECURITY|LOGIC|PERF|COVERAGE|VIOLATION|CODE-MISSING|DRIFT|CODE-AHEAD|SPEC-SILENT|PR-BODY] <file:line> — <evidence, one line>
+- [SECURITY|LOGIC|PERF|COVERAGE|VIOLATION|MISSING-IMPL|DRIFT|EXTRA-BEHAVIOR|SPEC-GAP|PR-BODY] <file:line> — <evidence, one line>
 - ...
 
 ### PR-body honesty sections
@@ -105,7 +105,7 @@ either `APPROVE` or `REQUEST_CHANGES` (nothing else on that line):
 - Spec Alignment: PRESENT | MISSING
 
 ### Summary
-<one paragraph: what blocks, what is non-blocking (SPEC-SILENT), what is clean>
+<one paragraph: what blocks, what is non-blocking (SPEC-GAP), what is clean>
 
 APPROVE
 ```

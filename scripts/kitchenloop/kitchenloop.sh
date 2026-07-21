@@ -280,8 +280,8 @@ load_counter() {
 # The project CLAUDE.md template carries the rule: "if .kitchenloop/STOP
 # exists, every loop phase refuses to run until the owner deletes it." Any
 # phase may create it (with a reason) when drift metrics or stop conditions
-# trip. The regulator is not modifiable by what it regulates: only the owner
-# removes the sentinel.
+# trip. The loop can raise the sentinel but never clear it — only the owner
+# removes it.
 STOP_FILE="$REPO_ROOT/.kitchenloop/STOP"
 ESCALATIONS_FILE="$REPO_ROOT/ESCALATIONS.md"
 

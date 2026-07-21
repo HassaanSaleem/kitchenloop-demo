@@ -17,8 +17,8 @@ as your final action.
    gated merge pipeline, deploys), do NOT do it: add a row to
    `{{REPO_ROOT}}/ESCALATIONS.md` in the exact format that file documents (one
    table row plus one context paragraph below it), output
-   `RESULT: STUCK: [reason]`, and stop. A gate that is not in ESCALATIONS.md
-   was not asked.
+   `RESULT: STUCK: [reason]`, and stop. If it is not recorded in
+   ESCALATIONS.md, the loop has not actually asked.
 3. **No interactive owner.** Never use AskUserQuestion and never wait for
    human input. Every ask goes to `ESCALATIONS.md` as an entry — never buried in
    a PR comment, prose, or chat.
@@ -149,10 +149,10 @@ Three-way ALIGNMENT review — verify code, spec, and architecture agree. Read b
 
 Classify EVERY finding into exactly one state:
 - VIOLATION    — code contradicts the spec or plan (blocking)
-- CODE-MISSING — a spec requirement has no implementation and no recorded deferral (blocking)
+- MISSING-IMPL — a spec requirement has no implementation and no recorded deferral (blocking)
 - DRIFT        — implementation violates a system invariant (cite the invariant id) or diverges from the plan's architecture: wrong module boundary, a core schema forked outside its canonical package, external API shapes leaking past the adapter boundary, money path without state-conservation handling, procedure without role authorization (blocking)
-- CODE-AHEAD   — implemented behavior with no basis in the spec/plan (scope creep; blocking unless trivially cosmetic)
-- SPEC-SILENT  — significant implemented behavior the spec does not address (NOT blocking: report it so a spec-amendment ticket is filed; the spec evolves through SDD, code does not silently define it)
+- EXTRA-BEHAVIOR   — implemented behavior with no basis in the spec/plan (scope creep; blocking unless trivially cosmetic)
+- SPEC-GAP  — significant implemented behavior the spec does not address (NOT blocking: report it so a spec-amendment ticket is filed; the spec evolves through SDD, code does not silently define it)
 
 Then review correctness, security, and style as usual.
 End your output with a line containing exactly APPROVE or REQUEST_CHANGES, then the findings list with each finding's state label, file, and evidence." < /dev/null
@@ -167,19 +167,19 @@ alignment review could not run), output
 `RESULT: STUCK: codex review unavailable (merge gate)`, and stop. Never record
 the outage only in a PR comment.
 
-**Routing rule (double-loop split):** VIOLATION / CODE-MISSING / DRIFT / CODE-AHEAD
-mean the *code* is wrong → fix autonomously in this pipeline. SPEC-SILENT means the
+**Routing rule (two-loop routing):** VIOLATION / MISSING-IMPL / DRIFT / EXTRA-BEHAVIOR
+mean the *code* is wrong → fix autonomously in this pipeline. SPEC-GAP means the
 *spec* is wrong or incomplete → file a spec-amendment ticket (`improvement` type,
 titled `spec-gap: ...`) and do NOT block the merge on it. Code fixes are autonomous;
 spec changes go back through the SDD flow.
 
-**Deferral cross-check (before blocking on CODE-MISSING).** codex reviews only the
+**Deferral cross-check (before blocking on MISSING-IMPL).** codex reviews only the
 diff + branch files — it does NOT see the PR description, so it cannot know a
-requirement was deliberately deferred. Before treating any codex `CODE-MISSING` as
+requirement was deliberately deferred. Before treating any codex `MISSING-IMPL` as
 blocking, confirm the requirement was not recorded as out-of-scope/deferred in
 `$SPEC_DIR/plan.md` OR the PR body (`gh pr view {{PR_NUMBER}} --json body -q .body`).
-If a deferral is recorded there, it is NOT CODE-MISSING — reclassify it as
-SPEC-SILENT (non-blocking) so codex's blindness to the PR description cannot
+If a deferral is recorded there, it is NOT MISSING-IMPL — reclassify it as
+SPEC-GAP (non-blocking) so codex's blindness to the PR description cannot
 false-block a PR on already-agreed scope.
 
 ### 4b. Gemini Review (only if `reviewers.gemini.enabled: true` in kitchenloop.yaml)

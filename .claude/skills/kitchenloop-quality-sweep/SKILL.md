@@ -64,8 +64,8 @@ boundaries, not arbitrary line counts.
 3. **Spec↔code completeness** (alignment with SDD): for each feature merged since
    the last sweep, open its `specs/<NNN>/spec.md` and verify every functional
    requirement maps to code + a test. Unimplemented-and-undeferred requirements
-   are CODE-MISSING tickets; implemented-but-unspecified behavior is a
-   SPEC-SILENT ticket (spec amendment, not code change).
+   are MISSING-IMPL tickets; implemented-but-unspecified behavior is a
+   SPEC-GAP ticket (spec amendment, not code change).
 4. Test-coverage shape: every handler/domain function has its happy-path +
    error-branch tests (policy rule) — list gaps, don't chase percentages.
 

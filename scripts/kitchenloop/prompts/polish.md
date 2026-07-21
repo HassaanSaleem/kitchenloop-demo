@@ -9,7 +9,7 @@ You are running **autonomously** as part of the Kitchen Loop. No interactive own
    [polish] STOPPED -- .kitchenloop/STOP present, iteration {{ITERATION_NUM}}
    ```
 2. **Read `MANDATE.md`** (the owner's standing mandate) before doing anything else. It lists what ALWAYS stops: any work item matching the ALWAYS-STOP list in MANDATE.md (e.g. core schema migrations, changes to money-path semantics, changes to the loop's own gates, pushes outside the gated merge pipeline, deploys). The pr-manager merge into `{{BASE_BRANCH}}` this phase runs IS that gated pipeline (authorized). But if any step would force-push, push to a NEW remote, or deploy: do NOT do it — append an entry to `ESCALATIONS.md` (one table row `| ID | Say | Question | Recommendation | Since | Blocks |` plus a one-paragraph context block) and stop that step.
-3. **No interactive owner.** The owner is asynchronous; the ONLY channel to them is an `ESCALATIONS.md` entry. A gate that is not in ESCALATIONS.md was not asked.
+3. **No interactive owner.** The owner is asynchronous; the ONLY channel to them is an `ESCALATIONS.md` entry. If it is not recorded in ESCALATIONS.md, the loop has not actually asked.
 
 ## Autonomous Mode Rules
 

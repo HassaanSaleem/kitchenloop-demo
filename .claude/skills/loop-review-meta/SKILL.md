@@ -147,7 +147,7 @@ total = novelty + durability + escalation + throughput
 Based on the analysis, generate systemic recommendations that go beyond
 individual ticket fixes:
 
-> **Owner-gate caveat (protected regulator).** The loop may not tune its own
+> **Owner-gate caveat (protected gates).** The loop may not tune its own
 > gates or cadence. Any recommendation that would change a **gate** (quality bar,
 > regression oracle definitions, UAT protocol, quality-sweep rules, MANDATE, or
 > the pr-manager review stages), a **cadence** (`runtime.review_interval`,

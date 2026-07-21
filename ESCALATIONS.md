@@ -1,16 +1,17 @@
-# ESCALATIONS — what the loop is waiting on YOU for
+# ESCALATIONS — open questions the loop has parked for the owner
 
-One row per pending human gate. The loop adds a row whenever it stops for the
-owner, then continues other work; the owner answers asynchronously by saying
-the exact word(s) in **Say**. Cleared rows are removed (history lives in the
-loop state and git log). Empty table = nothing is asked of you.
+Each row is one decision the loop could not make for itself. It adds a row,
+keeps working on everything else, and waits; the owner replies whenever, by
+saying the word(s) in **Say**. Once handled, the row is deleted — the history
+survives in the loop state and the git log. No rows means the loop currently
+needs nothing from a human.
 
 Rules for the loop:
-- Every stop-for-the-owner MUST be a row here — never buried in prose or a PR
-  comment. A gate that is not in ESCALATIONS.md was not asked.
-- Each row includes one short context paragraph directly below the table row it
-  belongs to: what happened, the recommendation, and what stays blocked.
-- Never edit or reinterpret an existing row's **Say** word; add a new row instead.
+- If the loop stops for the owner, it goes here — not into prose, a PR comment,
+  or chat. An unrecorded question has not really been asked.
+- Put one short context paragraph directly under the row it belongs to: what
+  happened, the recommendation, and what stays blocked meanwhile.
+- Never rewrite or reinterpret an existing row's **Say** word; add a new row.
 
 | ID | Say | Question | Recommendation | Since | Blocks |
 |----|-----|----------|----------------|-------|--------|

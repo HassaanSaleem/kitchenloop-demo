@@ -62,8 +62,8 @@ spec:
 verification:
   oracle:
     type: "deterministic"
-    full_command: "node --test"
-    quick_command: "node --test"
+    full_command: "node --test tests/*.test.mjs"
+    quick_command: "node --test tests/*.test.mjs"
     smoke_command: "node tests/smoke.mjs"
     lint_command: "node scripts/lint.mjs"
   regress_l3_boot: false
