@@ -27,6 +27,12 @@ export function buildApp({ storePath } = {}) {
     try {
       if (req.method === "POST" && url.pathname === "/notes") {
         const body = await readJson(req);
+        // README documents the create schema as {title, body?, tags?} — title
+        // is required. Reject a missing/blank title with a 400 (honest errors)
+        // rather than silently storing a title-less note.
+        if (typeof body?.title !== "string" || body.title.trim() === "") {
+          return send(400, { error: "title is required" });
+        }
         return send(201, store.create(body));
       }
       if (req.method === "GET" && url.pathname === "/notes") {
@@ -47,6 +53,9 @@ export function buildApp({ storePath } = {}) {
       }
       const shareMatch = url.pathname.match(/^\/notes\/([^/]+)\/share$/);
       if (req.method === "POST" && shareMatch) {
+        // Match the 404 semantics of GET/DELETE /notes/:id — never mint a token
+        // for a note id that doesn't resolve to a real note.
+        if (!store.get(shareMatch[1])) return send(404, { error: "not found" });
         return send(201, { token: shares.share(shareMatch[1]) });
       }
       const sharedMatch = url.pathname.match(/^\/shared\/([^/]+)$/);
