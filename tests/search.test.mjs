@@ -23,6 +23,14 @@ test("empty query returns nothing", () => {
   assert.equal(searchNotes(store, null).length, 0);
 });
 
+test("matches regardless of case", () => {
+  const store = tempStore();
+  store.create({ title: "Relay Launch", body: "kickoff plan" });
+  assert.equal(searchNotes(store, "relay").length, 1, "lowercase query matches a capitalized title");
+  assert.equal(searchNotes(store, "RELAY").length, 1, "uppercase query matches too");
+  assert.equal(searchNotes(store, "KICKOFF").length, 1, "case-insensitive on body as well");
+});
+
 test("tolerates a note missing title or body without throwing", () => {
   const store = tempStore();
   store.create({ title: "Groceries", body: "milk, eggs" });

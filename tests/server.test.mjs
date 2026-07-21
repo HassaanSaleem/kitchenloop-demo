@@ -63,6 +63,22 @@ test("POST /notes still creates a well-formed note (201)", async () => {
   }
 });
 
+test("GET /search matches case-insensitively", async () => {
+  const { app, base } = await boot();
+  try {
+    await fetch(`${base}/notes`, {
+      method: "POST",
+      body: JSON.stringify({ title: "Relay Launch", body: "kickoff" }),
+    });
+    const res = await fetch(`${base}/search?q=relay`);
+    assert.equal(res.status, 200);
+    const results = await res.json();
+    assert.equal(results.length, 1, "q=relay finds \"Relay Launch\"");
+  } finally {
+    app.close();
+  }
+});
+
 test("GET /search tolerates a pre-existing title-less note (200, not 500)", async () => {
   // A record missing `title` may already exist on disk from before validation
   // was added. Search must degrade gracefully, not 500 the whole collection.
