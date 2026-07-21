@@ -27,6 +27,8 @@ export function buildApp({ storePath } = {}) {
     try {
       if (req.method === "POST" && url.pathname === "/notes") {
         const body = await readJson(req);
+        const invalid = validateCreate(body);
+        if (invalid) return send(400, { error: invalid });
         return send(201, store.create(body));
       }
       if (req.method === "GET" && url.pathname === "/notes") {
@@ -47,6 +49,7 @@ export function buildApp({ storePath } = {}) {
       }
       const shareMatch = url.pathname.match(/^\/notes\/([^/]+)\/share$/);
       if (req.method === "POST" && shareMatch) {
+        if (!store.get(shareMatch[1])) return send(404, { error: "not found" });
         return send(201, { token: shares.share(shareMatch[1]) });
       }
       const sharedMatch = url.pathname.match(/^\/shared\/([^/]+)$/);
@@ -60,6 +63,20 @@ export function buildApp({ storePath } = {}) {
       return send(500, { error: err.message });
     }
   });
+}
+
+// Validate a POST /notes payload against the documented {title, body?, tags?}
+// schema. Returns an error string for a 400, or null when the payload is OK.
+// `title` is required and must be a non-empty string; missing/blank titles are
+// rejected here rather than stored verbatim.
+function validateCreate(body) {
+  if (body === null || typeof body !== "object" || Array.isArray(body)) {
+    return "request body must be a JSON object";
+  }
+  if (typeof body.title !== "string" || body.title.trim() === "") {
+    return "title is required";
+  }
+  return null;
 }
 
 function readJson(req) {
