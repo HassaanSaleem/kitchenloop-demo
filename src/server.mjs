@@ -53,6 +53,10 @@ export function buildApp({ storePath } = {}) {
       }
       const shareMatch = url.pathname.match(/^\/notes\/([^/]+)\/share$/);
       if (req.method === "POST" && shareMatch) {
+        // Only share a note that exists — match the 404 semantics of
+        // GET /notes/:id and DELETE /notes/:id rather than minting a token
+        // for an id that will never resolve to real data.
+        if (!store.get(shareMatch[1])) return send(404, { error: "not found" });
         return send(201, { token: shares.share(shareMatch[1]) });
       }
       const sharedMatch = url.pathname.match(/^\/shared\/([^/]+)$/);

@@ -63,6 +63,39 @@ test("POST /notes still creates a well-formed note (201)", async () => {
   }
 });
 
+test("POST /notes/:id/share 404s for a note id that was never created", async () => {
+  const { app, base } = await boot();
+  try {
+    const res = await fetch(`${base}/notes/00000000-0000-0000-0000-000000000000/share`, {
+      method: "POST",
+    });
+    assert.equal(res.status, 404, "sharing an unknown id must 404, like GET/DELETE /notes/:id");
+    const err = await res.json();
+    assert.ok(err.error, "404 carries a JSON error body");
+  } finally {
+    app.close();
+  }
+});
+
+test("POST /notes/:id/share still returns a token for a real note (201)", async () => {
+  const { app, base } = await boot();
+  try {
+    const note = await (await fetch(`${base}/notes`, {
+      method: "POST",
+      body: JSON.stringify({ title: "Shareable" }),
+    })).json();
+    const res = await fetch(`${base}/notes/${note.id}/share`, { method: "POST" });
+    assert.equal(res.status, 201, "a real note id still mints a token");
+    const { token } = await res.json();
+    assert.ok(token, "share returns a token");
+    // The minted token resolves back to the note for a reader.
+    const shared = await (await fetch(`${base}/shared/${token}`)).json();
+    assert.equal(shared.id, note.id);
+  } finally {
+    app.close();
+  }
+});
+
 test("GET /search matches a note by its tag", async () => {
   const { app, base } = await boot();
   try {
