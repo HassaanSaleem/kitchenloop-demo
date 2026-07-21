@@ -62,3 +62,22 @@ test("POST /notes still creates a well-formed note (201)", async () => {
     app.close();
   }
 });
+
+test("GET /search tolerates a pre-existing title-less note (200, not 500)", async () => {
+  // A record missing `title` may already exist on disk from before validation
+  // was added. Search must degrade gracefully, not 500 the whole collection.
+  const now = "2026-07-21T08:00:00.000Z";
+  const { app, base } = await boot([
+    { id: "good-1", title: "Groceries", body: "milk, eggs", tags: [], createdAt: now, updatedAt: now },
+    { id: "bad-1", body: "no title here", tags: [], createdAt: now, updatedAt: now },
+  ]);
+  try {
+    const res = await fetch(`${base}/search?q=milk`);
+    assert.equal(res.status, 200, "one malformed note must not 500 search for everyone");
+    const results = await res.json();
+    assert.equal(results.length, 1, "the well-formed note is still found");
+    assert.equal(results[0].id, "good-1");
+  } finally {
+    app.close();
+  }
+});

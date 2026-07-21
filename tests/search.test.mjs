@@ -22,3 +22,13 @@ test("empty query returns nothing", () => {
   assert.equal(searchNotes(store, "").length, 0);
   assert.equal(searchNotes(store, null).length, 0);
 });
+
+test("tolerates a note missing title or body without throwing", () => {
+  const store = tempStore();
+  store.create({ title: "Groceries", body: "milk, eggs" });
+  // Inject records as if loaded from disk before title validation existed.
+  store.notes.set("bad-title", { id: "bad-title", body: "no title", tags: [], createdAt: "2026-07-21T08:00:00.000Z" });
+  store.notes.set("bad-body", { id: "bad-body", title: "no body", tags: [], createdAt: "2026-07-21T08:00:00.000Z" });
+  assert.doesNotThrow(() => searchNotes(store, "milk"));
+  assert.equal(searchNotes(store, "milk").length, 1, "still finds the well-formed note");
+});
