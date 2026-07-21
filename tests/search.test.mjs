@@ -22,3 +22,21 @@ test("empty query returns nothing", () => {
   assert.equal(searchNotes(store, "").length, 0);
   assert.equal(searchNotes(store, null).length, 0);
 });
+
+test("tolerates malformed notes (missing title or body) without throwing", () => {
+  const store = tempStore();
+  store.create({ title: "Groceries", body: "milk, eggs" });
+  store.create({ body: "orphaned body, no title" }); // title === undefined
+  store.notes.set("hand-crafted", {
+    id: "hand-crafted",
+    title: "Loose",
+    body: undefined, // undefined body
+    tags: [],
+    createdAt: new Date(0).toISOString(),
+    updatedAt: new Date(0).toISOString(),
+  });
+  assert.doesNotThrow(() => searchNotes(store, "milk"));
+  const hits = searchNotes(store, "milk");
+  assert.equal(hits.length, 1, "well-formed note is still found alongside malformed ones");
+  assert.equal(hits[0].title, "Groceries");
+});

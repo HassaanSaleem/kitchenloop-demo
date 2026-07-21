@@ -74,6 +74,23 @@ test("POST /notes with a blank title returns 400", async () => {
   }
 });
 
+test("GET /search does not 500 when a note in the store lacks a title", async () => {
+  const seeded = seedStore([
+    { id: "good-1", title: "Groceries", body: "milk, eggs", tags: [], createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z" },
+    { id: "bad-1", body: "orphaned body, no title", tags: [], createdAt: "2026-01-02T00:00:00.000Z", updatedAt: "2026-01-02T00:00:00.000Z" },
+  ]);
+  const srv = await start(seeded);
+  try {
+    const res = await fetch(`${srv.base}/search?q=milk`);
+    assert.equal(res.status, 200, "one malformed note must not 500 search for the whole collection");
+    const results = await res.json();
+    assert.equal(results.length, 1);
+    assert.equal(results[0].id, "good-1");
+  } finally {
+    srv.close();
+  }
+});
+
 test("POST /notes/:id/share on an unknown id returns 404", async () => {
   const srv = await start();
   try {
