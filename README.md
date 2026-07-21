@@ -13,14 +13,23 @@ implementation, gated merges.
 ## The API
 
 ```
-POST   /notes            {title, body?, tags?}   -> 201 note
+POST   /notes            {title, body?, tags?}   -> 201 note | 400
 GET    /notes                                    -> 200 [notes], newest first
 GET    /notes/:id                                -> 200 note | 404
 DELETE /notes/:id                                -> 204 | 404
 GET    /search?q=term                            -> 200 [notes]
-POST   /notes/:id/share                          -> 201 {token}
+POST   /notes/:id/share                          -> 201 {token} | 404
 GET    /shared/:token                            -> 200 note | 404
 ```
+
+Behavior notes:
+
+- `POST /notes` requires a non-empty `title`; a missing or empty title is
+  rejected with `400 {error}` (the note is not stored).
+- `GET /search?q=term` matches a note's `title`, `body`, and `tags`, and is
+  case-insensitive.
+- `POST /notes/:id/share` returns `404` when the note id does not exist,
+  matching `GET`/`DELETE /notes/:id`.
 
 ```bash
 npm start          # serve on :3000 (PORT to override)
