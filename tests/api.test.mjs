@@ -91,6 +91,23 @@ test("GET /search does not 500 when a note in the store lacks a title", async ()
   }
 });
 
+test("GET /search matches a note by one of its tags", async () => {
+  const srv = await start();
+  try {
+    await fetch(`${srv.base}/notes`, {
+      method: "POST",
+      body: JSON.stringify({ title: "Standup notes", body: "ship the demo", tags: ["work"] }),
+    });
+    const res = await fetch(`${srv.base}/search?q=work`);
+    assert.equal(res.status, 200);
+    const results = await res.json();
+    assert.equal(results.length, 1, "a query equal to a tag should match the note");
+    assert.equal(results[0].title, "Standup notes");
+  } finally {
+    srv.close();
+  }
+});
+
 test("GET /search matches regardless of case", async () => {
   const srv = await start();
   try {
