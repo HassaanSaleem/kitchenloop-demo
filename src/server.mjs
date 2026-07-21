@@ -27,6 +27,12 @@ export function buildApp({ storePath } = {}) {
     try {
       if (req.method === "POST" && url.pathname === "/notes") {
         const body = await readJson(req);
+        // README documents the create schema as {title, body?, tags?} — title
+        // is required. Reject a missing/empty title at the boundary with an
+        // honest 400 rather than persisting a malformed note.
+        if (typeof body.title !== "string" || body.title.trim() === "") {
+          return send(400, { error: "title is required" });
+        }
         return send(201, store.create(body));
       }
       if (req.method === "GET" && url.pathname === "/notes") {
