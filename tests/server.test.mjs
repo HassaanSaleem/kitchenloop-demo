@@ -63,6 +63,22 @@ test("POST /notes still creates a well-formed note (201)", async () => {
   }
 });
 
+test("GET /search matches a note by its tag", async () => {
+  const { app, base } = await boot();
+  try {
+    await fetch(`${base}/notes`, {
+      method: "POST",
+      body: JSON.stringify({ title: "Standup", body: "sync", tags: ["work"] }),
+    });
+    const res = await fetch(`${base}/search?q=work`);
+    assert.equal(res.status, 200);
+    const results = await res.json();
+    assert.equal(results.length, 1, "q=work matches the note's \"work\" tag");
+  } finally {
+    app.close();
+  }
+});
+
 test("GET /search matches case-insensitively", async () => {
   const { app, base } = await boot();
   try {

@@ -23,6 +23,14 @@ test("empty query returns nothing", () => {
   assert.equal(searchNotes(store, null).length, 0);
 });
 
+test("matches on a note's tags, not just title/body", () => {
+  const store = tempStore();
+  store.create({ title: "Standup notes", body: "sync", tags: ["work", "team"] });
+  assert.equal(searchNotes(store, "work").length, 1, "an exact tag value is matched");
+  assert.equal(searchNotes(store, "WORK").length, 1, "tag matching is case-insensitive too");
+  assert.equal(searchNotes(store, "missing").length, 0, "a non-matching term still finds nothing");
+});
+
 test("matches regardless of case", () => {
   const store = tempStore();
   store.create({ title: "Relay Launch", body: "kickoff plan" });
